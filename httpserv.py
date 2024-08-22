@@ -15,6 +15,14 @@ def setup_game():
     app.arena = Arena.from_config('examples/chameleon.json')
     return jsonify({'msg': "arena is loaded!"})
 
+@app.route('/chatarena/reset', methods=['POST'])
+def reset_game():
+    if app.arena is None:
+        return jsonify({'error': "arena is undefined!"}), 400
+    app.arena.reset()
+    app.arena = None
+    return jsonify({'msg': "arena is unloaded!"})
+    
 #curl -X POST http://localhost:8080/chatarena/step
 @app.route('/chatarena/step', methods=['POST'])
 def step_game():
