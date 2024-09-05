@@ -12,8 +12,9 @@ def health():
 @app.route('/chatarena/setup', methods=['POST'])
 def setup_game():
     # 创建Arena对象
-    app.arena = Arena.from_config('examples/chameleon.json')
-    return jsonify({'msg': "arena is loaded!"})
+    env_conf = 'whoisthespy'
+    app.arena = Arena.from_config(f'examples/{env_conf}.json')
+    return jsonify({'msg': f"arena {env_conf} is loaded!"})
 
 @app.route('/chatarena/reset', methods=['POST'])
 def reset_game():
@@ -31,11 +32,10 @@ def step_game():
 
     try:
         timestep = app.arena.step()
-        if timestep.terminal:
-            raise Exception("arena is end!")
-            
         observation = timestep.observation
         terminal = timestep.terminal
+        # if timestep.terminal:
+        #     raise Exception("arena is end!")
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 

@@ -4,6 +4,7 @@ from .chameleon import Chameleon
 from .conversation import Conversation, ModeratedConversation
 from .pettingzoo_chess import PettingzooChess
 from .pettingzoo_tictactoe import PettingzooTicTacToe
+from .whoisthespy import Whoisthespy
 
 
 # Load an environment from a config dictionary
