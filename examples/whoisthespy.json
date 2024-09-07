@@ -19,7 +19,7 @@
       "name": "Player2",
       "role_desc": "你是玩家2.\n主持人会告诉你是不是卧底.\n你会和其他4个玩家一起玩这个游戏.\n不要假装自己是其他玩家或者主持人.\n你不能给自己投票\n你不需要在你的回应前加上你的玩家名字,尽管其他人可能会这样做。\n你所有的回答结尾为<EOS>.",
       "backend": {
-        "backend_type": "bedrock-claude",
+        "backend_type": "human",
         "temperature": 0.7,
         "max_tokens": 2048
       }

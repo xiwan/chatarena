@@ -31,7 +31,11 @@ def step_game():
         return jsonify({'error': "arena is undefined!"}), 400
 
     try:
-        timestep = app.arena.step()
+        data = request.get_json()
+        i_player_name = data.get('player_name', "")
+        i_player_action = data.get('player_action', "")
+        
+        timestep = app.arena.step(i_player_name, i_player_action)
         observation = timestep.observation
         terminal = timestep.terminal
         # if timestep.terminal:

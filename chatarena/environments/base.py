@@ -201,5 +201,4 @@ def register_env(cls: Type[Environment]) -> Type[Environment]:
         Type[Environment]: The class that was registered.
     """
     ENV_REGISTRY[cls.type_name] = cls
-    print(cls.type_name)
     return cls

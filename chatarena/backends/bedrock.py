@@ -130,4 +130,7 @@ class BedrockClaude(IntelligenceBackend):
         response = re.sub(rf"^\s*\[.*]:", "", response).strip()
         response = re.sub(rf"^\s*{re.escape(agent_name)}\s*:", "", response).strip()
         response = re.sub(rf"{END_OF_MESSAGE}$", "", response).strip()
+        
+        # print(f"----------response----------")
+        # print(f"{response}")
         return response

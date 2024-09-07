@@ -118,7 +118,7 @@ class Whoisthespy(Environment):
         )
         self._moderator_speak("你是卧底!", visible_to=self.chameleon_name)
         self._moderator_speak(
-            "你们可以简要地描绘该词语 (不要直接给出词语). "
+            "需要简要地描绘该词语，比如用几个词语描绘该词语（篮球运动员，黑人），但不要直接给出词语。 "
             f"不要重复前面的内容，我们从玩家 {self.player_names[0]} 开始."
         )
         self._current_turn = 1
@@ -235,7 +235,7 @@ class Whoisthespy(Environment):
         if not self._initialized:
             self.reset()
 
-        # self.message_pool.print()
+        self.message_pool.print()
         # print(f"Chameleon: {self.chameleon_name}, Code: {self.code}, Topic: {self.topic}")
         assert (
             player_name == self.get_next_player()

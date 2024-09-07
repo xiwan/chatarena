@@ -47,19 +47,34 @@ class Arena:
         self.uuid = uuid.uuid4()
         return self.current_timestep
 
-    def step(self) -> TimeStep:
+    def step(self, i_player_name, i_player_action) -> TimeStep:
         """Take a step in the game: one player takes an action and the environment updates."""
         player_name = self.environment.get_next_player()
         player = self.name_to_player[player_name]  # get the player object
+
         observation = self.environment.get_observation(
             player_name
         )  # get the observation for the player
-
         timestep = None
+        print(f"{i_player_name}, {i_player_action}")
+        if self.next_is_human():
+            if not bool(i_player_name) or not bool(i_player_action):
+                raise Exception(f"required player_name or player_action is empty")
+            if i_player_name is player_name:
+                raise Exception(f"not a valid player_name")
+
         for i in range(
             self.invalid_actions_retry
         ):  # try to take an action for a few times
-            action = player(observation)  # take an action
+            
+            if self.next_is_human():
+                if not bool(i_player_name) or not bool(i_player_action):
+                    raise Exception(f"required player_name or player_action is empty")
+                player_name = i_player_name
+                action = i_player_action
+            else:
+                action = player(observation)  # take an action
+                
             if self.environment.check_action(action, player_name):  # action is valid
                 timestep = self.environment.step(
                     player_name, action
