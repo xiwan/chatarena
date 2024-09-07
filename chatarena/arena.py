@@ -47,7 +47,7 @@ class Arena:
         self.uuid = uuid.uuid4()
         return self.current_timestep
 
-    def step(self, i_player_name, i_player_action) -> TimeStep:
+    def step(self, i_player_name="", i_player_action="") -> TimeStep:
         """Take a step in the game: one player takes an action and the environment updates."""
         player_name = self.environment.get_next_player()
         player = self.name_to_player[player_name]  # get the player object

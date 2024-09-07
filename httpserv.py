@@ -5,6 +5,16 @@ from chatarena.arena import Arena
 app = Flask(__name__)
 app.arena = None
 
+def filter_observations(observations, player_name):
+    filtered_observations = []
+    for observation in observations:
+        #print(observation)
+        visible_to = observation.visible_to
+        if visible_to == "all" or player_name in visible_to:
+            filtered_observations.append(observation)
+            visible_to = "all"
+    return filtered_observations
+
 @app.route('/', methods=['GET'])
 def health():
     return jsonify({'msg': "ok"})
@@ -23,7 +33,33 @@ def reset_game():
     app.arena.reset()
     app.arena = None
     return jsonify({'msg': "arena is unloaded!"})
+
+@app.route('/chatarena/p_step', methods=['POST'])
+def p_step_game():
+    try:
+        data = request.get_json()
+        i_player_name = data.get('player_name', "")
+        i_player_action = data.get('player_action', "")
+        
+        timestep = app.arena.step(i_player_name, i_player_action)
+        observation = timestep.observation
+        terminal = timestep.terminal
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400  
+
+    # 返回结果
+    response = {
+        'observation': observation,
+        'terminal': terminal
+    }
     
+    new_response = dict(response)
+
+    new_response["observation"] = filter_observations(new_response["observation"], i_player_name)
+#     output["observation"] = data
+    return jsonify(new_response)
+
 #curl -X POST http://localhost:8080/chatarena/step
 @app.route('/chatarena/step', methods=['POST'])
 def step_game():
