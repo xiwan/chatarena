@@ -67,7 +67,7 @@ def create_guardrail(bedrock_client, name, description):
 
         
 def setup_guardrail():
-    bedrock_client = boto3.client('bedrock', region_name='us-west-2')
+    bedrock_client = boto3.client('bedrock', region_name='us-east-1')
     # guardrail_name = 'ChatArena-Guardrail'
 
     try:

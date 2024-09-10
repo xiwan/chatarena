@@ -9,7 +9,7 @@ import boto3
 from botocore.config import Config
 from . import bedrock_guardrail
 
-DEFAULT_REGION = 'us-west-2'
+DEFAULT_REGION = 'us-east-1'
 is_bedrock_available = False
 
 try:
@@ -34,8 +34,6 @@ STOP = ("<|endoftext|>", END_OF_MESSAGE)
 BASE_PROMPT = f"The messages always end with the token {END_OF_MESSAGE}."
 
 guardrailid, guardrailversion = bedrock_guardrail.setup_guardrail()
-
-
 
 @register_backend
 class BedrockClaude(IntelligenceBackend):
@@ -148,11 +146,14 @@ class BedrockClaude(IntelligenceBackend):
                 last_role = "user"
             else:
                 role = "assistant" if msg.agent_name == agent_name else "user"
-                 ## --- 插入guardrail check -------
-                _guardrail_action = self.apply_guardrails(msg.content)
-                if _guardrail_action != "NONE":
-                    print(f"_guardrail_action block {msg.content}")
-                    msg.content ="该发言内容敏感，无法显示"
+                # print(msg)
+                # ## --- 插入guardrail check -------
+                # _guardrail_action = self.apply_guardrails(msg.content)
+                # if _guardrail_action != "NONE":
+                #     print(f"_guardrail_action block {msg.content}")
+                #     msg.content ="该发言内容敏感，无法显示2"
+                # ## --- guardrail check -------
+
                 if role == last_role:
                     messages[-1]["content"] += f"\n\n[{msg.agent_name}]: {msg.content}{END_OF_MESSAGE}"
                 else:
@@ -163,10 +164,18 @@ class BedrockClaude(IntelligenceBackend):
         if request_msg:
             if last_role == "user":
                 messages.append({"role": "assistant", "content": "Understood."})
+                
+            # ## --- 插入guardrail check -------
+            # _guardrail_action = self.apply_guardrails(request_msg.content)
+            # if _guardrail_action != "NONE":
+            #     print(f"_guardrail_action block {request_msg.content}")
+            #     request_msg.content ="该发言内容敏感，无法显示"
+            # ## --- guardrail check -------    
             messages.append({"role": "user", "content": request_msg.content})
         else:
             if last_role == "user":
                 messages.append({"role": "assistant", "content": "Understood."})
+            
             request_msg_agent = {"role": "user", "content": f"Now you speak, {agent_name}.{END_OF_MESSAGE}"}
             messages.append(request_msg_agent)
 

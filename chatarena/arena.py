@@ -9,7 +9,47 @@ from .backends import Human
 from .config import ArenaConfig
 from .environments import Environment, TimeStep, load_environment
 
+import os
+import re
+import json
+import boto3
+from .backends import  bedrock_guardrail
+from botocore.config import Config
 
+DEFAULT_REGION = 'us-east-1'
+# Check if the necessary AWS credentials are set
+session = boto3.Session()
+bedrock = session.client(
+    service_name='bedrock-runtime',
+    region_name=os.environ.get('AWS_DEFAULT_REGION', DEFAULT_REGION),
+    config=Config(retries={'max_attempts': 3, 'mode': 'standard'})
+)
+bedrockRuntimeClient = boto3.client('bedrock-runtime', region_name=DEFAULT_REGION)
+
+def apply_guardrails(input_text: str) -> tuple:
+    guardrail_id, guardrail_version = bedrock_guardrail.setup_guardrail()
+    if not guardrail_id or not guardrail_version:
+        return input_text, "ALLOW"
+    # content_str = [{"text": {input_text}}]
+    input = input_text
+    content_str=[{"text": {"text": input}}]
+    try:
+        response = bedrockRuntimeClient.apply_guardrail(
+            guardrailIdentifier=guardrail_id,
+            guardrailVersion=guardrail_version,
+            source='INPUT',
+            content=content_str
+        )
+
+        print(f'Guradrail respoinse: {response}')
+        guardrailResult = response["action"]
+        return guardrailResult
+
+
+    except Exception as e:
+        print(f"Error applying guardrail: {e}")
+        return input_text, "ALLOW"
+        
 class TooManyInvalidActions(Exception):
     pass
 
@@ -75,6 +115,14 @@ class Arena:
             else:
                 action = player(observation)  # take an action
                 
+             ## --- 插入guardrail check -------
+            _guardrail_action = apply_guardrails(action)
+            print(_guardrail_action)
+            if _guardrail_action != "NONE":
+                print(f"_guardrail_action block {action}")
+                action = f"该发言内容敏感，无法显示"
+            ## --- guardrail check -------  
+            
             if self.environment.check_action(action, player_name):  # action is valid
                 timestep = self.environment.step(
                     player_name, action

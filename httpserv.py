@@ -22,9 +22,14 @@ def health():
 @app.route('/chatarena/setup', methods=['POST'])
 def setup_game():
     # 创建Arena对象
-    env_conf = 'whoisthespy'
-    app.arena = Arena.from_config(f'examples/{env_conf}.json')
-    return jsonify({'msg': f"arena {env_conf} is loaded!"})
+    i_env_conf = "whoisthespy"
+    data = request.get_json()
+    if 'env_conf' in data:
+        i_env_conf = data.get('env_conf', "whoisthespy")
+    
+    # env_conf = 'whoisthespy'
+    app.arena = Arena.from_config(f'examples/{i_env_conf}.json')
+    return jsonify({'msg': f"arena {i_env_conf} is loaded!"})
 
 @app.route('/chatarena/reset', methods=['POST'])
 def reset_game():
@@ -38,8 +43,12 @@ def reset_game():
 def p_step_game():
     try:
         data = request.get_json()
-        i_player_name = data.get('player_name', "")
-        i_player_action = data.get('player_action', "")
+        i_player_name = ""
+        i_player_action = ""
+        if 'player_name' in data:
+            i_player_name = data.get('player_name', "")
+        if 'player_action' in data:
+            i_player_action = data.get('player_action', "")
         
         timestep = app.arena.step(i_player_name, i_player_action)
         observation = timestep.observation
