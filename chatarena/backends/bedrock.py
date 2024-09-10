@@ -146,14 +146,6 @@ class BedrockClaude(IntelligenceBackend):
                 last_role = "user"
             else:
                 role = "assistant" if msg.agent_name == agent_name else "user"
-                # print(msg)
-                # ## --- 插入guardrail check -------
-                # _guardrail_action = self.apply_guardrails(msg.content)
-                # if _guardrail_action != "NONE":
-                #     print(f"_guardrail_action block {msg.content}")
-                #     msg.content ="该发言内容敏感，无法显示2"
-                # ## --- guardrail check -------
-
                 if role == last_role:
                     messages[-1]["content"] += f"\n\n[{msg.agent_name}]: {msg.content}{END_OF_MESSAGE}"
                 else:
@@ -163,14 +155,7 @@ class BedrockClaude(IntelligenceBackend):
     
         if request_msg:
             if last_role == "user":
-                messages.append({"role": "assistant", "content": "Understood."})
-                
-            # ## --- 插入guardrail check -------
-            # _guardrail_action = self.apply_guardrails(request_msg.content)
-            # if _guardrail_action != "NONE":
-            #     print(f"_guardrail_action block {request_msg.content}")
-            #     request_msg.content ="该发言内容敏感，无法显示"
-            # ## --- guardrail check -------    
+                messages.append({"role": "assistant", "content": "Understood."})   
             messages.append({"role": "user", "content": request_msg.content})
         else:
             if last_role == "user":

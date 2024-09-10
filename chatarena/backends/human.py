@@ -1,13 +1,11 @@
 from ..config import BackendConfig
 from .base import IntelligenceBackend, register_backend
-
-
+    
 # An Error class for the human backend
 class HumanBackendError(Exception):
     def __init__(self, agent_name: str):
         self.agent_name = agent_name
         super().__init__(f"Human backend requires a UI to get input from {agent_name}.")
-
 
 @register_backend
 class Human(IntelligenceBackend):
@@ -21,4 +19,5 @@ class Human(IntelligenceBackend):
         return BackendConfig(backend_type=self.type_name)
 
     def query(self, agent_name: str, **kwargs) -> str:
-        raise HumanBackendError(agent_name)
+        # raise HumanBackendError(agent_name)
+        return apply_guardrails()

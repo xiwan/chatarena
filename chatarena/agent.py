@@ -15,6 +15,13 @@ from .message import SYSTEM_NAME, Message
 SIGNAL_END_OF_CONVERSATION = f"<<<<<<END_OF_CONVERSATION>>>>>>{uuid.uuid4()}"
 
 
+import os
+import re
+import json
+import boto3
+from botocore.config import Config
+from .backends import bedrock, bedrock_guardrail
+
 class Agent(Configurable):
     """An abstract base class for all the agents in the chatArena environment."""
 
@@ -159,6 +166,30 @@ class Player(Agent):
         This is usually called at the end of each episode.
         """
         self.backend.reset()
+        
+    def apply_guardrails(self, input_text: str) -> tuple:
+        guardrail_id, guardrail_version = bedrock_guardrail.setup_guardrail()
+        if not guardrail_id or not guardrail_version:
+            return input_text, "ALLOW"
+        # content_str = [{"text": {input_text}}]
+        input = input_text
+        content_str=[{"text": {"text": input}}]
+        try:
+            response = bedrock.bedrockRuntimeClient.apply_guardrail(
+                guardrailIdentifier=guardrail_id,
+                guardrailVersion=guardrail_version,
+                source='INPUT',
+                content=content_str
+            )
+
+            print(f'Guradrail respoinse: {response}')
+            guardrailResult = response["action"]
+            return guardrailResult
+
+
+        except Exception as e:
+            print(f"Error applying guardrail: {e}")
+            return input_text, "ALLOW"
 
 
 class Moderator(Player):
