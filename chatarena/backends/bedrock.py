@@ -83,7 +83,7 @@ class BedrockClaude(IntelligenceBackend):
                 content=content_str
             )
             
-            print(f'Guradrail respoinse: {response}')
+            # print(f'Guradrail respoinse: {response}')
             guardrailResult = response["action"]
             return guardrailResult
         
@@ -103,7 +103,7 @@ class BedrockClaude(IntelligenceBackend):
             "temperature": self.temperature,
         }
         print(f"--------------------")
-        print(f"prompt is {messages}")
+        # print(f"prompt is {messages}")
         print(f"--------------------")
         response = bedrock.invoke_model(
             body=json.dumps(body),
@@ -113,10 +113,10 @@ class BedrockClaude(IntelligenceBackend):
         )
         
         # response_body = response['body'].read()
-        print(f"------response_str START-------")
+        # print(f"------response_str START-------")
         response_body = json.loads(response['body'].read())
         response_text = response_body['content'][0]['text']
-        print(f"response text is ------> {response_text}")
+        # print(f"response text is ------> {response_text}")
         return response_text
 
     def query(
@@ -135,35 +135,56 @@ class BedrockClaude(IntelligenceBackend):
             self.system_prompt = f"You are a player in the game, please do not reveal your identity. Your name is {agent_name}.\n\nYour role:{role_desc}\n\n{BASE_PROMPT}"
     
         messages = []
+        idx = 0
+        print("==== History Messages ====")
+        for idx, t_msg in enumerate(history_messages):
+            print(f"Message {idx + 1}:")
+            print(f"  Agent: {t_msg.agent_name}")
+            print(f"  Content: {t_msg.content}")
+            print("-------------------------")
+        print("==== End of History Messages ====")
     
         last_role = "system"
         for msg in history_messages:
-                
+            print(f"msg is spell-- {msg}")    
             if msg.agent_name == SYSTEM_NAME:
+                print(f"msg p -- 1")    
+
                 if last_role == "user":
                     messages.append({"role": "assistant", "content": "Understood."})
                 messages.append({"role": "user", "content": msg.content})
                 last_role = "user"
             else:
-                role = "assistant" if msg.agent_name == agent_name else "user"
+                print(f"msg p -- 2")  
+                print(f"msg.agent_nan is {msg.agent_name}, agent_name is {agent_name}")
+                if msg.agent_name:
+                    role = "user"
+                else:
+                    role = " assistant"
+
                 if role == last_role:
                     messages[-1]["content"] += f"\n\n[{msg.agent_name}]: {msg.content}{END_OF_MESSAGE}"
                 else:
                     messages.append({"role": role, "content": f"[{msg.agent_name}]: {msg.content}{END_OF_MESSAGE}"})
+                print(f"messages current is {messages}")
                 last_role = role
-
-    
+                
+        print(f"request_msg is {request_msg}")
         if request_msg:
+            print(f"msg p -- 3")  
             if last_role == "user":
+                
                 messages.append({"role": "assistant", "content": "Understood."})   
             messages.append({"role": "user", "content": request_msg.content})
         else:
+            print(f"msg p -- 4")  
             if last_role == "user":
                 messages.append({"role": "assistant", "content": "Understood."})
             
             request_msg_agent = {"role": "user", "content": f"Now you speak, {agent_name}.{END_OF_MESSAGE}"}
             messages.append(request_msg_agent)
-
+        
+    
         response = self._get_response(messages, *args, **kwargs)
         response = re.sub(rf"^\s*\[.*]:", "", response).strip()
         response = re.sub(rf"^\s*{re.escape(agent_name)}\s*:", "", response).strip()
